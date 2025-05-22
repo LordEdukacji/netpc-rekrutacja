@@ -28,11 +28,11 @@ namespace ContactsApp.Backend.Controllers
         // GET: api/Contact/cookie
         [HttpGet("cookie")]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Contact>>> CheckCookie()
+        public async Task<IActionResult> CheckCookie()
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                return Ok(User.Identity.Name);
+                return NoContent();
             }
             else
             {
@@ -40,8 +40,18 @@ namespace ContactsApp.Backend.Controllers
             }
         }
 
-        // returns 
+        // POST: api/Contact/logout
+        [HttpPost("logout")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout()
+        {
+            Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+            return NoContent();
+        }
+
         // GET: api/Contact
+        // returns partial contacts, only with ID and names
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ContactDTO>>> GetContacts()
@@ -57,6 +67,7 @@ namespace ContactsApp.Backend.Controllers
         }
 
         // GET: api/Contact/category/{id}
+        // get categorization with given ID
         [HttpGet("category/{id}")]
         public async Task<ActionResult<Categorization>> GetCategorization(long id)
         {
@@ -71,6 +82,7 @@ namespace ContactsApp.Backend.Controllers
         }
 
         // GET: api/Contact/5
+        // get full contact info (the categorization is references by id and has to be fetched separately)
         [HttpGet("{id}")]
         public async Task<ActionResult<Contact>> GetContact(long id)
         {
@@ -84,6 +96,7 @@ namespace ContactsApp.Backend.Controllers
             return contact;
         }
 
+
         // PUT: api/Contact/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -95,7 +108,8 @@ namespace ContactsApp.Backend.Controllers
             }
 
             // transform the text based categories into a reference
-            contactWithCategories.Categories.Id = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
+            var findCategorizationActionResult = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
+            contactWithCategories.Categories.Id = findCategorizationActionResult.Value;
             Contact contact = new Contact(contactWithCategories);
             contact.Id = id; // could also be copied inside Contact(contactWithCategories)
 
@@ -126,11 +140,21 @@ namespace ContactsApp.Backend.Controllers
         public async Task<ActionResult<Contact>> PostContact(ContactWithCategorization contactWithCategories)
         {
             // transform the text based categories into a reference
-            contactWithCategories.Categories.Id = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
+            var findCategorizationActionResult = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
+            contactWithCategories.Categories.Id = findCategorizationActionResult.Value;
             Contact contact = new Contact(contactWithCategories);
 
             _context.Contacts.Add(contact);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            
 
             return CreatedAtAction(nameof(GetContact), new { id = contact.Id }, contact);
         }
@@ -146,7 +170,15 @@ namespace ContactsApp.Backend.Controllers
             }
 
             _context.Contacts.Remove(contact);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
 
             return NoContent();
         }
@@ -157,7 +189,7 @@ namespace ContactsApp.Backend.Controllers
             return _context.Contacts.Any(e => e.Id == id);
         }
 
-        private async Task<long> FindCategorization(string category, string? subcategory)
+        private async Task<ActionResult<long>> FindCategorization(string category, string? subcategory)
         {
             var foundCategorization = await _context.Categorizations.FirstOrDefaultAsync(c => c.Category == category && c.Subcategory == subcategory);
 
@@ -165,7 +197,15 @@ namespace ContactsApp.Backend.Controllers
             {
                 foundCategorization = new Categorization() { Category = category, Subcategory = subcategory };
                 _context.Categorizations.Add(foundCategorization);
-                await _context.SaveChangesAsync();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    return BadRequest(e.Message);
+                }
             }
 
             return foundCategorization.Id;

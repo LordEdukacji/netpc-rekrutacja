@@ -1,4 +1,8 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
+﻿@using ContactsApp.Frontend.Providers
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject CustomAuthenticationStateProvider AuthStateProvider
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -8,7 +12,6 @@
         </button>
     </div>
 </div>
-
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
         <div class="nav-item px-3">
@@ -22,12 +25,12 @@
             </NavLink>
         </div>
         <CascadingAuthenticationState>
-            <AuthorizeView>
+            <AuthorizeView> <!--depends on login state-->
                 <Authorized>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="contacts">
-                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Contacts yes yes yes
-                        </NavLink>  
+                        <NavLink class="nav-link" href="" @onclick="sendLogout">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Log out
+                        </NavLink>
                     </div>
                 </Authorized>
                 <NotAuthorized>
@@ -55,5 +58,17 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    // contact the endpoint to invalidate the cookie
+    private void sendLogout()
+    {
+        // for some reason the compiler ofter complains about not being able to await these methods
+        var postResult = Http.PostAsync("api/contact/logout", null);
+
+        // would work if above method was called with async
+        //if (postResult.IsSuccessStatusCode) Navigation.NavigateTo(""); 
+
+        AuthStateProvider.RefreshAuthenticationState();   // to refresh the sidebar buttons
     }
 }

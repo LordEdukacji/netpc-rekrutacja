@@ -1,8 +1,10 @@
 ﻿@page "/login"
 @using System.ComponentModel.DataAnnotations
 @using ContactsApp.Frontend.Models
+@using ContactsApp.Frontend.Providers
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Log in</PageTitle>
 
@@ -33,8 +35,11 @@
 
     private async Task Submit()
     {
+        // cookie is guaranteed with useCookies=true
         var postResult = await Http.PostAsJsonAsync("login?useCookies=true", accountData);
 
         if (postResult.IsSuccessStatusCode) Navigation.NavigateTo("");
+
+        AuthenticationStateProvider.RefreshAuthenticationState();   // to refresh the sidebar buttons
     }
 }

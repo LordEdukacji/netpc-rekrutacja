@@ -1,11 +1,12 @@
 ﻿@page "/contacts/{contactid:long}/edit"
 @using ContactsApp.Frontend.Models
+@using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
 @if (contact == null)
 {
-    if (failed)
+    if (failedFetch)
     {
         <p>Failed to load contact with ID @ContactId</p>
         <p>Check if you are logged in and if the contact exists</p>
@@ -80,28 +81,47 @@ else
             <button type="reset">Reset</button>
         </div>
     </EditForm>
+
+    @if (failedFetch)
+    {
+        <div>
+            Creation failed. Check if the e-mail is unique.
+        </div>
+    }
 }
 
 @code {
     [Parameter]
     public long ContactId { get; set; }
+
+    // the contact to send
     private ContactWithCategorization? contact;
+
+    [Required]
     private string category = "";
     private string subcategory = "";
-    private bool failed = false;
+
+    // flag for errors concerning getting the existing object
+    private bool failedFetch = false;
+
+    // flag for errors concerning saving the modified object
+    private bool failedSave = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // fetch the existing contact data
         Contact receivedContact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
 
         if (receivedContact == null)
         {
-            failed = true;
+            failedFetch = true;
             return;
         }
 
+        // reconstruct data...
         contact = new ContactWithCategorization(receivedContact);
 
+        // ... and fetch categories
         Categorization categorization = await Http.GetFromJsonAsync<Categorization>($"api/contact/category/{receivedContact.CategorizationId}");
 
         if (categorization != null)
@@ -109,7 +129,7 @@ else
             contact.Categories = categorization;
         }
 
-        if (contact == null) failed = true;
+        if (contact == null) failedFetch = true;
 
     }
 
@@ -121,5 +141,6 @@ else
         var postResult = await Http.PutAsJsonAsync($"api/contact/{ContactId}", contact);
 
         if (postResult.IsSuccessStatusCode) Navigation.NavigateTo($"contacts/{ContactId}");
+        else failedSave = true;
     }
 }

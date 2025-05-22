@@ -61,6 +61,12 @@
             <InputText @bind-Value="subcategory" />
         </div>
     }
+    @if (failed)
+    {
+        <div>
+            Creation failed. Check if the e-mail is unique.
+        </div>
+    }
 
     <div>
         <button type="submit">Submit</button>
@@ -69,7 +75,10 @@
 </EditForm>
 
 @code {
+    // the contact to send
     private ContactWithCategorization contact = new ContactWithCategorization();
+
+    // flag for errors
     private bool failed = false;
 
     [Required]
@@ -83,5 +92,6 @@
         var postResult = await Http.PostAsJsonAsync("api/contact", contact);
 
         if (postResult.IsSuccessStatusCode) Navigation.NavigateTo("");
+        else failed = true;
     }
 }

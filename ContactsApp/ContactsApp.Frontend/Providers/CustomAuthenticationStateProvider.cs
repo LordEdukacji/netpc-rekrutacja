@@ -24,12 +24,11 @@ namespace ContactsApp.Frontend.Providers
             }
 
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-
-            //basic option, no cookie verification
-            //var claims = new ClaimsIdentity();
-            //return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(claims)));
         }
 
-
+        public void RefreshAuthenticationState()
+        {
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        }
     }
 }
