@@ -1,5 +1,6 @@
 ﻿namespace ContactsApp.Frontend.Models
 {
+    // for contact list
     public class ContactDTO
     {
         public long Id { get; set; }

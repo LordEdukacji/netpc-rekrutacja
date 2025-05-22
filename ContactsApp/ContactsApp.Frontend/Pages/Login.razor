@@ -10,7 +10,6 @@
 
 <h1>Log in</h1>
 
-
 <EditForm Model="accountData" OnValidSubmit="Submit">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -33,6 +32,7 @@
 @code {
     private AccountData accountData = new AccountData();
 
+    // send login request
     private async Task Submit()
     {
         // cookie is guaranteed with useCookies=true
@@ -40,6 +40,7 @@
 
         if (postResult.IsSuccessStatusCode) Navigation.NavigateTo("");
 
-        AuthenticationStateProvider.RefreshAuthenticationState();   // to refresh the sidebar buttons
+        // to refresh the sidebar buttons
+        AuthenticationStateProvider.RefreshAuthenticationState();   
     }
 }

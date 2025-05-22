@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ContactsApp.Frontend.Models
 {
+    // used as model in creation and edition forms
     public class AccountData
     {
         [EmailAddress]
@@ -11,6 +12,7 @@ namespace ContactsApp.Frontend.Models
         [MinLength(8)]
         public required string password { get; set; }
 
+        // for sending the request
         [SetsRequiredMembers]
         public AccountData(string email, string password)
         {
@@ -18,6 +20,7 @@ namespace ContactsApp.Frontend.Models
             this.password = password;
         }
 
+        // empty initialization for form
         [SetsRequiredMembers]
         public AccountData()
         {

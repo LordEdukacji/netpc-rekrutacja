@@ -3,6 +3,8 @@
 @using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 @if (contact == null)
 {
@@ -85,21 +87,23 @@ else
     @if (failedFetch)
     {
         <div>
-            Creation failed. Check if the e-mail is unique.
+            Creation failed. Check if the e-mail is unique and if the password is strong enough.
         </div>
     }
 }
 
 @code {
+    // ID from path
     [Parameter]
     public long ContactId { get; set; }
 
     // the contact to send
     private ContactWithCategorization? contact;
 
+    // for form model
     [Required]
-    private string category = "";
-    private string subcategory = "";
+    private string category = "Other";
+    private string subcategory = "Unknown";
 
     // flag for errors concerning getting the existing object
     private bool failedFetch = false;
@@ -133,9 +137,14 @@ else
 
     }
 
+    // send edited contact
     private async Task Submit()
     {
+        // ID has to be manually set
+        // this function can't be called when contact is null, dereference safe
         this.contact.Id = ContactId;
+
+        // fill categories inside object
         this.contact.Categories.Category = category;
         this.contact.Categories.Subcategory = subcategory;
         var postResult = await Http.PutAsJsonAsync($"api/contact/{ContactId}", contact);

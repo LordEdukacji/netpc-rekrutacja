@@ -2,6 +2,7 @@
 
 namespace ContactsApp.Frontend.Models
 {
+    // full contact, needs to fetch categories separately
     public class Contact
     {
         public long Id { get; set; }
@@ -13,6 +14,7 @@ namespace ContactsApp.Frontend.Models
         public required string PhoneNumber { get; set; }
         public DateOnly DateOfBirth { get; set; }
 
+        // empty initialization for form models
         [SetsRequiredMembers]
         public Contact()
         {
@@ -25,6 +27,7 @@ namespace ContactsApp.Frontend.Models
             DateOfBirth = new();
         }
 
+        // copy fields from contact with categorization object
         [SetsRequiredMembers]
         public Contact(ContactWithCategorization contactWithCategorization)
         {
@@ -39,6 +42,7 @@ namespace ContactsApp.Frontend.Models
         }
     }
 
+    // categories, held and fetched separately
     public class Categorization
     {
         public long Id { get; set; }
@@ -48,8 +52,9 @@ namespace ContactsApp.Frontend.Models
         [SetsRequiredMembers]
         public Categorization()
         {
-            Category = "";
-            Subcategory = "";
+            // if not set differently later
+            Category = "Other";
+            Subcategory = "Unknown";
         }
     }
 }

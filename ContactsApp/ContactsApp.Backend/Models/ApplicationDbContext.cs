@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContactsApp.Backend.Models
 {
+    // used by Identity API
     public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)

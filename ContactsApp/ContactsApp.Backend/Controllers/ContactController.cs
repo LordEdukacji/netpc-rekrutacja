@@ -41,6 +41,7 @@ namespace ContactsApp.Backend.Controllers
         }
 
         // POST: api/Contact/logout
+        // deletes the identity cookie
         [HttpPost("logout")]
         [AllowAnonymous]
         public async Task<IActionResult> Logout()
@@ -57,8 +58,9 @@ namespace ContactsApp.Backend.Controllers
         public async Task<ActionResult<IEnumerable<ContactDTO>>> GetContacts()
         {
             var dtoList = new List<ContactDTO>();
+            var contacts = _context.Contacts.ToList();
 
-            foreach (Contact c in _context.Contacts.ToList())
+            foreach (Contact c in contacts)
             {
                 dtoList.Add(new ContactDTO(c));
             }
@@ -98,7 +100,7 @@ namespace ContactsApp.Backend.Controllers
 
 
         // PUT: api/Contact/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // receives an updated contact with categories, transforms and saves it
         [HttpPut("{id}")]
         public async Task<IActionResult> PutContact(long id, ContactWithCategorization contactWithCategories)
         {
@@ -110,6 +112,8 @@ namespace ContactsApp.Backend.Controllers
             // transform the text based categories into a reference
             var findCategorizationActionResult = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
             contactWithCategories.Categories.Id = findCategorizationActionResult.Value;
+
+            // transform into the form used for saving
             Contact contact = new Contact(contactWithCategories);
             contact.Id = id; // could also be copied inside Contact(contactWithCategories)
 
@@ -135,7 +139,7 @@ namespace ContactsApp.Backend.Controllers
         }
 
         // POST: api/Contact
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // receives a new contact with categories, transforms and saves it
         [HttpPost]
         public async Task<ActionResult<Contact>> PostContact(ContactWithCategorization contactWithCategories)
         {
@@ -160,6 +164,7 @@ namespace ContactsApp.Backend.Controllers
         }
 
         // DELETE: api/Contact/5
+        // delete the contact
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContact(long id)
         {
@@ -189,6 +194,8 @@ namespace ContactsApp.Backend.Controllers
             return _context.Contacts.Any(e => e.Id == id);
         }
 
+        // finds the ID of the categorization with matching category and subcategory
+        // create a new one if not found
         private async Task<ActionResult<long>> FindCategorization(string category, string? subcategory)
         {
             var foundCategorization = await _context.Categorizations.FirstOrDefaultAsync(c => c.Category == category && c.Subcategory == subcategory);

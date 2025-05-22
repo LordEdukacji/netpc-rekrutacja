@@ -2,6 +2,7 @@
 
 namespace ContactsApp.Backend.Models
 {
+    // used for storing contacts and categories
     public class ContactContext : DbContext
     {
         public ContactContext(DbContextOptions<ContactContext> options) : base(options)
@@ -20,6 +21,7 @@ namespace ContactsApp.Backend.Models
                 .HasIndex(c => c.Email)
                 .IsUnique();
 
+            // enforce uniqueness
             modelBuilder.Entity<Categorization>()
                 .HasIndex(c => new { c.Category, c.Subcategory })
                 .IsUnique();

@@ -2,6 +2,8 @@
 @using ContactsApp.Frontend.Models
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <PageTitle>Contacts</PageTitle>
 
@@ -75,10 +77,16 @@ else
     public long ContactId { get; set; }
     private Contact? contact;
     private Categorization? categorization;
-    private bool failed = false, invalidCategory = false;
+
+
+    private bool failed = false;
+
+    // could not find category with specified ID
+    private bool invalidCategory = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // get contact
         try
         {
             contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
@@ -94,6 +102,7 @@ else
             return;
         }
 
+        // get category info
         categorization = await Http.GetFromJsonAsync<Categorization>($"api/contact/category/{contact.CategorizationId}");
 
         if (categorization == null)
@@ -102,10 +111,15 @@ else
         }
     }
 
+    // delete
     private async void deleteButtonClick()
     {
         var deleteResult = await Http.DeleteAsync($"api/contact/{contact.Id}");
 
         if (deleteResult.IsSuccessStatusCode) Navigation.NavigateTo("contacts");
     }
+
+    // functions like the above should probably be moved to separate files made for this purpose
+    // unfortunately I do not have time for such pleasures at this moment
+    // very regretfully
 }

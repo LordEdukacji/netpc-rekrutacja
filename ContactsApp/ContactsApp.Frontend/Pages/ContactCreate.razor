@@ -3,6 +3,8 @@
 @using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 <h1>Add a new contact</h1>
 
@@ -41,9 +43,11 @@
             <InputRadio Value=@("Private") /> Private
             <InputRadio Value=@("Other") /> Other
         </InputRadioGroup>
-    </div>   
+    </div>
+    <!-- Private has no suboption -->
     @if (category == "Professional")
     {
+        <!-- Professional has preset suboptions -->
         <div>
             <label>Subcategory</label>
             <InputRadioGroup @bind-Value="subcategory">
@@ -56,15 +60,17 @@
     }
     else if (category == "Other")
     {
+        <!-- Other opens a text field -->
         <div>
             <label>Subcategory</label>
             <InputText @bind-Value="subcategory" />
         </div>
     }
+
     @if (failed)
     {
         <div>
-            Creation failed. Check if the e-mail is unique.
+            Creation failed. Check if the e-mail is unique and if the password is strong enough.
         </div>
     }
 
@@ -82,13 +88,15 @@
     private bool failed = false;
 
     [Required]
-    private string category = "";
-    private string subcategory = "";
+    private string category = "Other";
+    private string subcategory = "Unknown";
 
     private async Task Submit()
     {
+        // copy categorization into contact
         this.contact.Categories.Category = category;
         this.contact.Categories.Subcategory = subcategory;
+
         var postResult = await Http.PostAsJsonAsync("api/contact", contact);
 
         if (postResult.IsSuccessStatusCode) Navigation.NavigateTo("");

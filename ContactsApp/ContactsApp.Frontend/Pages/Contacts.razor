@@ -15,6 +15,7 @@
 }
 else
 {
+    <!-- don't show the option to users who are not logged in -->
     <CascadingAuthenticationState>
         <AuthorizeView>
             <Authorized>
@@ -23,8 +24,6 @@ else
         </AuthorizeView>
     </CascadingAuthenticationState>
     
-    
-
     <table class="table">
         <thead>
             <tr>
@@ -49,10 +48,10 @@ else
 @code {
     private ContactDTO[]? contactDTOs;
 
+    // fill contact list
     protected override async Task OnInitializedAsync()
     {
         contactDTOs = await Http.GetFromJsonAsync<ContactDTO[]>("api/contact");
     }
 
-    
 }

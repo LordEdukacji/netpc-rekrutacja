@@ -27,13 +27,15 @@
         <CascadingAuthenticationState>
             <AuthorizeView> <!--depends on login state-->
                 <Authorized>
+                    <!-- for  logged in users -->
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="" @onclick="sendLogout">
                             <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Log out
                         </NavLink>
                     </div>
                 </Authorized>
-                <NotAuthorized>
+                <NotAuthorized> 
+                    <!-- for not logged in users -->
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="login">
                             <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Log in

@@ -9,6 +9,7 @@ namespace ContactsApp.Backend.Models
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
 
+        // create DTO from full contact
         [SetsRequiredMembers]
         public ContactDTO(Contact contact)
         {

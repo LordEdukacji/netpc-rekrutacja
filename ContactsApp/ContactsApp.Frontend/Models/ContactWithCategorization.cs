@@ -1,18 +1,25 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using ContactsApp.Frontend.Validators;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ContactsApp.Frontend.Models
 {
+    // send to API endpoints when creating and editing contacts
     public class ContactWithCategorization
     {
         public long Id { get; set; }
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
+        [EmailAddress]
         public required string Email { get; set; }
+        [PasswordValidator]
         public required string Password { get; set; }
         public required Categorization Categories { get; set; }
+        [PhoneNumberValidator]
         public required string PhoneNumber { get; set; }
-        public DateOnly DateOfBirth { get; set; }
+        public required DateOnly DateOfBirth { get; set; }
 
+        // empty initialization for forms
         [SetsRequiredMembers]
         public ContactWithCategorization()
         {
