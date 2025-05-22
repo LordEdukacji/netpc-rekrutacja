@@ -1,0 +1,10 @@
+@ContactsApp.Backend_HostAddress = https://localhost:7020
+
+GET {{ContactsApp.Backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+GET {{ContactsApp.Backend_HostAddress}}/api/contact
+
+###

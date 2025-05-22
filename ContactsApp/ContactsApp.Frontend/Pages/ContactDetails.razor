@@ -1,0 +1,82 @@
+﻿@page "/contacts/{contactid:long}"
+@inject HttpClient Http
+
+<PageTitle>Contacts</PageTitle>
+
+<h1>Contact details</h1>
+
+@if (contact == null)
+{
+    if (failed)
+    {
+        <p>Failed to load contact with ID @ContactId</p>
+        <p>Check if you are logged in and if the contact exists</p>
+    }
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
+    
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>E-mail</th>
+                <th>Password</th>
+                <th>Category</th>
+                <th>Subcategory</th>
+                <th>Phone number</th>
+                <th>Date of birth</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@contact.FirstName</td>
+                <td>@contact.LastName</td>
+                <td>@contact.Email</td>
+                <td>@contact.Password</td>
+                <td>@contact.Category</td>
+                <td>@contact.Subcategory</td>
+                <td>@contact.PhoneNumber</td>
+                <td>@contact.DateOfBirth.ToShortDateString()</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public long ContactId { get; set; }
+    private Contact? contact;
+    private bool failed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
+        }
+        catch (Exception e)
+        {
+            failed = true;
+        }
+        
+    }
+
+    public class Contact
+    {
+        public long Id { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
+        public required string Category { get; set; }
+        public required string Subcategory { get; set; }
+        public required string PhoneNumber { get; set; }
+        public DateOnly DateOfBirth { get; set; }
+    }
+}
