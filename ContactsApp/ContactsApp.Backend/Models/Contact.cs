@@ -13,6 +13,7 @@ namespace ContactsApp.Backend.Models
         public required string PhoneNumber { get; set; }
         public DateOnly DateOfBirth { get; set; }
 
+        // the CategorizationId has to be set in contactWithCategorization before that
         [SetsRequiredMembers]
         public Contact(ContactWithCategorization contactWithCategorization)
         {

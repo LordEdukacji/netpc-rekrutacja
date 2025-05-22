@@ -12,7 +12,7 @@ namespace ContactsApp.Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ContactController : ControllerBase
     {
         private readonly ContactContext _context;
@@ -22,12 +22,38 @@ namespace ContactsApp.Backend.Controllers
             _context = context;
         }
 
+        // verifies if cookie contains valid authentication claims
+        // located in this controller for simplicity
+        // should be moved elsewhere if more account functionality was to be developed
+        // GET: api/Contact/cookie
+        [HttpGet("cookie")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<Contact>>> CheckCookie()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return Ok(User.Identity.Name);
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+
+        // returns 
         // GET: api/Contact
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Contact>>> GetContacts()
+        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetContacts()
         {
-            return await _context.Contacts.ToListAsync();
+            var dtoList = new List<ContactDTO>();
+
+            foreach (Contact c in _context.Contacts.ToList())
+            {
+                dtoList.Add(new ContactDTO(c));
+            }
+
+            return dtoList;
         }
 
         // GET: api/Contact/category/{id}
@@ -61,12 +87,17 @@ namespace ContactsApp.Backend.Controllers
         // PUT: api/Contact/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutContact(long id, Contact contact)
+        public async Task<IActionResult> PutContact(long id, ContactWithCategorization contactWithCategories)
         {
-            if (id != contact.Id)
+            if (id != contactWithCategories.Id)
             {
                 return BadRequest();
             }
+
+            // transform the text based categories into a reference
+            contactWithCategories.Categories.Id = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
+            Contact contact = new Contact(contactWithCategories);
+            contact.Id = id; // could also be copied inside Contact(contactWithCategories)
 
             _context.Entry(contact).State = EntityState.Modified;
 
@@ -94,8 +125,8 @@ namespace ContactsApp.Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Contact>> PostContact(ContactWithCategorization contactWithCategories)
         {
+            // transform the text based categories into a reference
             contactWithCategories.Categories.Id = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
-
             Contact contact = new Contact(contactWithCategories);
 
             _context.Contacts.Add(contact);

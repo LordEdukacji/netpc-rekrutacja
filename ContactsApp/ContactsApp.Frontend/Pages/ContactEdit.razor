@@ -1,20 +1,125 @@
 ﻿@page "/contacts/{contactid:long}/edit"
 @using ContactsApp.Frontend.Models
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
-<h3>Edit a contact</h3>
+@if (contact == null)
+{
+    if (failed)
+    {
+        <p>Failed to load contact with ID @ContactId</p>
+        <p>Check if you are logged in and if the contact exists</p>
+    }
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
+}
+else
+{
+    <h1>Edit a contact</h1>
+
+    <EditForm Model="contact" OnValidSubmit="Submit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label>First name</label>
+            <InputText @bind-Value="contact.FirstName" />
+        </div>
+        <div>
+            <label>Last name</label>
+            <InputText @bind-Value="contact.LastName" />
+        </div>
+        <div>
+            <label>E-mail</label>
+            <InputText @bind-Value="contact.Email" />
+        </div>
+        <div>
+            <label>Password</label>
+            <InputText type="password" @bind-Value="contact.Password" />
+        </div>
+        <div>
+            <label>Phone number</label>
+            <InputText @bind-Value="contact.PhoneNumber" />
+        </div>
+        <div>
+            <label>Date of birth</label>
+            <InputDate @bind-Value="contact.DateOfBirth" />
+        </div>
+        <div>
+            <label>Category</label>
+            <InputRadioGroup @bind-Value="category">
+                <InputRadio Value=@("Professional") /> Professional
+                <InputRadio Value=@("Private") /> Private
+                <InputRadio Value=@("Other") /> Other
+            </InputRadioGroup>
+        </div>
+        @if (category == "Professional")
+        {
+            <div>
+                <label>Subcategory</label>
+                <InputRadioGroup @bind-Value="subcategory">
+                    <InputRadio Value=@("Boss") /> Boss
+                    <InputRadio Value=@("Client") /> Client
+                    <InputRadio Value=@("Coworker") /> Coworker
+                    <InputRadio Value=@("Support") /> Support
+                </InputRadioGroup>
+            </div>
+        }
+        else if (category == "Other")
+        {
+            <div>
+                <label>Subcategory</label>
+                <InputText @bind-Value="subcategory" />
+            </div>
+        }
+
+        <div>
+            <button type="submit">Submit</button>
+            <button type="reset">Reset</button>
+        </div>
+    </EditForm>
+}
 
 @code {
     [Parameter]
     public long ContactId { get; set; }
-    private Contact? contact;
+    private ContactWithCategorization? contact;
+    private string category = "";
+    private string subcategory = "";
     private bool failed = false;
 
     protected override async Task OnInitializedAsync()
     {
-        contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
+        Contact receivedContact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
+
+        if (receivedContact == null)
+        {
+            failed = true;
+            return;
+        }
+
+        contact = new ContactWithCategorization(receivedContact);
+
+        Categorization categorization = await Http.GetFromJsonAsync<Categorization>($"api/contact/category/{receivedContact.CategorizationId}");
+
+        if (categorization != null)
+        {
+            contact.Categories = categorization;
+        }
 
         if (contact == null) failed = true;
 
+    }
+
+    private async Task Submit()
+    {
+        this.contact.Id = ContactId;
+        this.contact.Categories.Category = category;
+        this.contact.Categories.Subcategory = subcategory;
+        var postResult = await Http.PutAsJsonAsync($"api/contact/{ContactId}", contact);
+
+        if (postResult.IsSuccessStatusCode) Navigation.NavigateTo($"contacts/{ContactId}");
     }
 }

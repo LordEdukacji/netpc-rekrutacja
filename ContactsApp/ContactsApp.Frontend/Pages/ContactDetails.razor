@@ -1,6 +1,7 @@
 ﻿@page "/contacts/{contactid:long}"
 @using ContactsApp.Frontend.Models
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>Contacts</PageTitle>
 
@@ -21,7 +22,7 @@
 }
 else
 {
-    <NavLink href="contacts/{contactid}/edit">Edit this contact</NavLink>
+    <NavLink href="@($"contacts/{contact.Id}/edit")">Edit this contact</NavLink>
 
     <table class="table">
         <thead>
@@ -66,7 +67,7 @@ else
         </tbody>
     </table>
 
-
+    <button @onclick="deleteButtonClick">Delete contact</button>
 }
 
 @code {
@@ -78,7 +79,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
+        try
+        {
+            contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
+        }
+        catch (Exception e)
+        {
+            failed = true;
+        }
 
         if (contact == null)
         {
@@ -92,5 +100,12 @@ else
         {
             invalidCategory = true;
         }
+    }
+
+    private async void deleteButtonClick()
+    {
+        var deleteResult = await Http.DeleteAsync($"api/contact/{contact.Id}");
+
+        if (deleteResult.IsSuccessStatusCode) Navigation.NavigateTo("contacts");
     }
 }

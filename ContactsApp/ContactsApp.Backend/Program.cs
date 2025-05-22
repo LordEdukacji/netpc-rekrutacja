@@ -13,7 +13,10 @@ builder.Services.AddCors(opt =>
     opt.AddPolicy(CorsPolicy,
         policy =>
         {
-            policy.WithOrigins(builder.Configuration["FrondendAppUrl"]);
+            policy.WithOrigins(builder.Configuration["FrondendAppUrl"])
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
         });
 });
 

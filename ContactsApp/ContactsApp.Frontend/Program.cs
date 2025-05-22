@@ -1,4 +1,5 @@
 using ContactsApp.Frontend;
+using ContactsApp.Frontend.Handlers;
 using ContactsApp.Frontend.Providers;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -8,7 +9,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["ApiSettings:ApiUrl"]) });
+builder.Services.AddScoped(sp => new HttpClient (new AccountCookieHandler()) { BaseAddress = new Uri(builder.Configuration["ApiSettings:ApiUrl"]) });
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();

@@ -1,4 +1,6 @@
-﻿namespace ContactsApp.Backend.Models
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace ContactsApp.Backend.Models
 {
     // limited contact info for contact list
     public class ContactDTO
@@ -7,9 +9,12 @@
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
 
-        public ContactDTO convertToDTO(Contact contact)
+        [SetsRequiredMembers]
+        public ContactDTO(Contact contact)
         {
-            return new ContactDTO() { Id = contact.Id, FirstName = contact.FirstName, LastName = contact.LastName };
+            Id = contact.Id;
+            FirstName = contact.FirstName;
+            LastName = contact.LastName;
         }
     }
 }

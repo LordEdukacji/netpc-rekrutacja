@@ -1,6 +1,8 @@
 ﻿@page "/contacts/add"
 @using ContactsApp.Frontend.Models
+@using System.ComponentModel.DataAnnotations
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <h1>Add a new contact</h1>
 
@@ -22,8 +24,44 @@
     </div>
     <div>
         <label>Password</label>
-        <InputText @bind-Value="contact.Password" />
+        <InputText type="password" @bind-Value="contact.Password" />
     </div>
+    <div>
+        <label>Phone number</label>
+        <InputText @bind-Value="contact.PhoneNumber" />
+    </div>
+    <div>
+        <label>Date of birth</label>
+        <InputDate @bind-Value="contact.DateOfBirth" />
+    </div>
+    <div>
+        <label>Category</label>
+        <InputRadioGroup @bind-Value="category">
+            <InputRadio Value=@("Professional") /> Professional
+            <InputRadio Value=@("Private") /> Private
+            <InputRadio Value=@("Other") /> Other
+        </InputRadioGroup>
+    </div>   
+    @if (category == "Professional")
+    {
+        <div>
+            <label>Subcategory</label>
+            <InputRadioGroup @bind-Value="subcategory">
+                <InputRadio Value=@("Boss") /> Boss
+                <InputRadio Value=@("Client") /> Client
+                <InputRadio Value=@("Coworker") /> Coworker
+                <InputRadio Value=@("Support") /> Support
+            </InputRadioGroup>
+        </div>
+    }
+    else if (category == "Other")
+    {
+        <div>
+            <label>Subcategory</label>
+            <InputText @bind-Value="subcategory" />
+        </div>
+    }
+
     <div>
         <button type="submit">Submit</button>
         <button type="reset">Reset</button>
@@ -31,11 +69,19 @@
 </EditForm>
 
 @code {
-    private Contact? contact;
+    private ContactWithCategorization contact = new ContactWithCategorization();
     private bool failed = false;
 
-    private void Submit()
+    [Required]
+    private string category = "";
+    private string subcategory = "";
+
+    private async Task Submit()
     {
-        
+        this.contact.Categories.Category = category;
+        this.contact.Categories.Subcategory = subcategory;
+        var postResult = await Http.PostAsJsonAsync("api/contact", contact);
+
+        if (postResult.IsSuccessStatusCode) Navigation.NavigateTo("");
     }
 }

@@ -1,0 +1,39 @@
+﻿@page "/register"
+@using System.ComponentModel.DataAnnotations
+@using ContactsApp.Frontend.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Register</PageTitle>
+
+<h1>Register</h1>
+
+<EditForm Model="accountData" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="accountData.email" />
+    </div>
+
+    <div>
+        <label>Password:</label>
+        <InputText @bind-Value="accountData.password" type="password" />
+    </div>
+
+    <div>
+        <button type="submit">Register</button>
+    </div>
+</EditForm>
+
+@code {
+    private AccountData accountData = new AccountData();
+
+    private async Task Submit()
+    {
+        var postResult = await Http.PostAsJsonAsync("register", accountData);
+
+        if (postResult.IsSuccessStatusCode) Navigation.NavigateTo("");
+    }
+}
