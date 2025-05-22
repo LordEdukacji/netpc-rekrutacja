@@ -15,16 +15,19 @@ namespace ContactsApp.Frontend.Providers
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            //var response = await httpClient.GetAsync("/api/contact/cookie");
+            var response = await httpClient.GetAsync("/api/contact/cookie");
 
-            //if (response.IsSuccessStatusCode)
-            //{
-            //    var claims = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "Authenticated") }, "Authenticated");
-            //}
+            if (response.IsSuccessStatusCode)
+            {
+                var claims = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "Authenticated") }, "Authenticated");
+                return new AuthenticationState(new ClaimsPrincipal(claims));
+            }
+
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
             //basic option, no cookie verification
-            var claims = new ClaimsIdentity();
-            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(claims)));
+            //var claims = new ClaimsIdentity();
+            //return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(claims)));
         }
 
 
