@@ -1,0 +1,41 @@
+﻿@page "/contacts/add"
+@using ContactsApp.Frontend.Models
+@inject HttpClient Http
+
+<h1>Add a new contact</h1>
+
+<EditForm Model="contact" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>First name</label>
+        <InputText @bind-Value="contact.FirstName"/>
+    </div>
+    <div>
+        <label>Last name</label>
+        <InputText @bind-Value="contact.LastName" />
+    </div>
+    <div>
+        <label>E-mail</label>
+        <InputText @bind-Value="contact.Email" />
+    </div>
+    <div>
+        <label>Password</label>
+        <InputText @bind-Value="contact.Password" />
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+        <button type="reset">Reset</button>
+    </div>
+</EditForm>
+
+@code {
+    private Contact? contact;
+    private bool failed = false;
+
+    private void Submit()
+    {
+        
+    }
+}

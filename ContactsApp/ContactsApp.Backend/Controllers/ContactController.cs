@@ -30,6 +30,20 @@ namespace ContactsApp.Backend.Controllers
             return await _context.Contacts.ToListAsync();
         }
 
+        // GET: api/Contact/category/{id}
+        [HttpGet("category/{id}")]
+        public async Task<ActionResult<Categorization>> GetCategorization(long id)
+        {
+            var categorization = await _context.Categorizations.FindAsync(id);
+
+            if (categorization == null)
+            {
+                return NotFound();
+            }
+
+            return categorization;
+        }
+
         // GET: api/Contact/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Contact>> GetContact(long id)
@@ -78,8 +92,12 @@ namespace ContactsApp.Backend.Controllers
         // POST: api/Contact
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Contact>> PostContact(Contact contact)
+        public async Task<ActionResult<Contact>> PostContact(ContactWithCategorization contactWithCategories)
         {
+            contactWithCategories.Categories.Id = await FindCategorization(contactWithCategories.Categories.Category, contactWithCategories.Categories.Subcategory);
+
+            Contact contact = new Contact(contactWithCategories);
+
             _context.Contacts.Add(contact);
             await _context.SaveChangesAsync();
 
@@ -102,9 +120,24 @@ namespace ContactsApp.Backend.Controllers
             return NoContent();
         }
 
+
         private bool ContactExists(long id)
         {
             return _context.Contacts.Any(e => e.Id == id);
+        }
+
+        private async Task<long> FindCategorization(string category, string? subcategory)
+        {
+            var foundCategorization = await _context.Categorizations.FirstOrDefaultAsync(c => c.Category == category && c.Subcategory == subcategory);
+
+            if (foundCategorization == null)
+            {
+                foundCategorization = new Categorization() { Category = category, Subcategory = subcategory };
+                _context.Categorizations.Add(foundCategorization);
+                await _context.SaveChangesAsync();
+            }
+
+            return foundCategorization.Id;
         }
     }
 }

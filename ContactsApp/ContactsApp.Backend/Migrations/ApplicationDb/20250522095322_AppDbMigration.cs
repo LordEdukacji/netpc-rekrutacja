@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ContactsApp.Backend.Migrations.ApplicationDb
 {
     /// <inheritdoc />
-    public partial class InitialAppDbMigration : Migration
+    public partial class AppDbMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

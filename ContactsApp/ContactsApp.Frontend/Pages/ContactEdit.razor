@@ -1,0 +1,20 @@
+﻿@page "/contacts/{contactid:long}/edit"
+@using ContactsApp.Frontend.Models
+@inject HttpClient Http
+
+<h3>Edit a contact</h3>
+
+@code {
+    [Parameter]
+    public long ContactId { get; set; }
+    private Contact? contact;
+    private bool failed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
+
+        if (contact == null) failed = true;
+
+    }
+}

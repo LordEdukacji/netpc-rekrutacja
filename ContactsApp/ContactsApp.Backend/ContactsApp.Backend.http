@@ -5,6 +5,29 @@ Accept: application/json
 
 ###
 
-GET {{ContactsApp.Backend_HostAddress}}/api/contact
+GET {{ContactsApp.Backend_HostAddress}}/api/contact/1
+
+###
+
+POST {{ContactsApp.Backend_HostAddress}}/api/contact
+Content-Type: application/json
+
+{
+  "firstName": "Imie166",
+  "lastName": "Nazwisko134",
+  "email": "mail2016@mail.pl",
+  "password": "haslohaslo",
+  "categories": {
+    "category": "Other",
+    "subcategory": "UFO"
+  },
+  "phoneNumber": "987654321",
+  "dateOfBirth": "1999-02-02"
+}
+
+###
+
+@id=3
+GET {{ContactsApp.Backend_HostAddress}}/api/contact/category/{{id}}
 
 ###

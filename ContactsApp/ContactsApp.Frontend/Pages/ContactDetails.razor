@@ -1,4 +1,5 @@
 ﻿@page "/contacts/{contactid:long}"
+@using ContactsApp.Frontend.Models
 @inject HttpClient Http
 
 <PageTitle>Contacts</PageTitle>
@@ -20,6 +21,8 @@
 }
 else
 {
+    <NavLink href="contacts/{contactid}/edit">Edit this contact</NavLink>
+
     <table class="table">
         <thead>
             <tr>
@@ -27,10 +30,10 @@ else
                 <th>Last name</th>
                 <th>E-mail</th>
                 <th>Password</th>
-                <th>Category</th>
-                <th>Subcategory</th>
                 <th>Phone number</th>
                 <th>Date of birth</th>
+                <th>Category</th>
+                <th>Subcategory</th>
             </tr>
         </thead>
         <tbody>
@@ -39,44 +42,55 @@ else
                 <td>@contact.LastName</td>
                 <td>@contact.Email</td>
                 <td>@contact.Password</td>
-                <td>@contact.Category</td>
-                <td>@contact.Subcategory</td>
                 <td>@contact.PhoneNumber</td>
-                <td>@contact.DateOfBirth.ToShortDateString()</td>
+                <td>@contact.DateOfBirth.ToLongDateString()</td>
+                @if (invalidCategory)
+                {
+                    <td>Unknown category</td>
+                    <td>Unknown subcategory</td>
+                }
+                else
+                {
+                    <td>@categorization.Category</td>
+                    @if (categorization.Subcategory == null)
+                    {
+                        <td>does not apply</td>
+                    }
+                    else
+                    {
+                        <td>@categorization.Subcategory</td>
+                    }
+                    
+                }
             </tr>
         </tbody>
     </table>
+
+
 }
 
 @code {
     [Parameter]
     public long ContactId { get; set; }
     private Contact? contact;
-    private bool failed = false;
+    private Categorization? categorization;
+    private bool failed = false, invalidCategory = false;
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
-        }
-        catch (Exception e)
+        contact = await Http.GetFromJsonAsync<Contact>($"api/contact/{ContactId}");
+
+        if (contact == null)
         {
             failed = true;
+            return;
         }
-        
-    }
 
-    public class Contact
-    {
-        public long Id { get; set; }
-        public required string FirstName { get; set; }
-        public required string LastName { get; set; }
-        public required string Email { get; set; }
-        public required string Password { get; set; }
-        public required string Category { get; set; }
-        public required string Subcategory { get; set; }
-        public required string PhoneNumber { get; set; }
-        public DateOnly DateOfBirth { get; set; }
+        categorization = await Http.GetFromJsonAsync<Categorization>($"api/contact/category/{contact.CategorizationId}");
+
+        if (categorization == null)
+        {
+            invalidCategory = true;
+        }
     }
 }
